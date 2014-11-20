@@ -2,9 +2,16 @@
 
 (require 'cl) ; use cl functions
 
-(defmacro fn-1 (body) 
-  "Convenience macro for defining anonymous unary functions"
-  `(lambda (_) ,body))
+(defmacro disable-y-or-n (unquoted-symbol)
+  "Convenience macro for silencing  y/n prompts associated with a command"
+  `(defadvice ,unquoted-symbol (around stfu compile activate)
+     (flet ((yes-or-no-p (&rest args) t)
+	    (y-or-n-p (&rest args) t))
+       ad-do-it)))
+
+(defmacro bind-key (key-str unquoted-symbol)
+  "Shortcut macro for globally binding a command to a key sequence"
+  `(global-set-key (kbd ,key-str) (quote ,unquoted-symbol)))
 
 (defun string-ends-with (str suffix)
   "Determines if a string ends with a particular suffix"
@@ -13,7 +20,7 @@
 (defun from-load-path (suffix)
   "Returns the first item on the emacs load-path with the specified suffix"
   (car (remove-if-not 
-	(fn-1 (string-ends-with _ suffix))
+	(lambda (file) (string-ends-with file suffix))
 	load-path)))
 
 (defun open-load-file (name) (interactive "MEnter elisp file name: ") 
@@ -22,13 +29,6 @@
     (find-file (from-load-path ".emacs"))
     (let ((fname (if (string-ends-with name ".el") name (concat name ".el"))))
       (find-file (from-load-path fname)))))
-
-(defun kbind-global (key-str symbol)
-  "Shortcut function for globally binding a command to a key sequence"
-  (global-set-key (kbd key-str) symbol))
-
-
-(kbind-global "C-x C-o" 'open-load-file)
 
 (defun load-recursive (file)
   "Function that recursively adds the contents of a particular directory 
@@ -63,5 +63,10 @@ onto the editor's load path"
 (require 'highlight-current-line)
 (highlight-current-line-on t)
 
-(kbind-global "C-x C-n" 'make-frame)
-(kbind-global "C-x C-k" 'delete-frame)
+(bind-key "C-x C-o" open-load-file)
+(bind-key "C-x C-n" make-frame)
+(bind-key "C-x C-k" delete-frame)
+(bind-key "C-x k" kill-this-buffer)
+(bind-key "C-t" ansi-term)
+
+(disable-y-or-n kill-this-buffer)

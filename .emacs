@@ -17,12 +17,18 @@
 	load-path)))
 
 (defun open-load-file (name) (interactive "MEnter elisp file name: ") 
-  "Opens ~/.emacs or an elisp file that is on the editor's load-path"
+  "Opens .emacs or an elisp file that is on the editor's load-path"
   (if (or (string= name "emacs") (string= name ".emacs") (string= name ""))
-    (find-file "~/.emacs")
+    (find-file (from-load-path ".emacs"))
     (let ((fname (if (string-ends-with name ".el") name (concat name ".el"))))
       (find-file (from-load-path fname)))))
-(global-set-key (kbd "C-x C-o") 'open-load-file)
+
+(defun kbind-global (key-str symbol)
+  "Shortcut function for globally binding a command to a key sequence"
+  (global-set-key (kbd key-str) symbol))
+
+
+(kbind-global "C-x C-o" 'open-load-file)
 
 (defun load-recursive (file)
   "Function that recursively adds the contents of a particular directory 
@@ -57,5 +63,5 @@ onto the editor's load path"
 (require 'highlight-current-line)
 (highlight-current-line-on t)
 
-(global-set-key (kbd "C-x C-n") 'make-frame)
-(global-set-key (kbd "C-x C-k") 'delete-frame)
+(kbind-global "C-x C-n" 'make-frame)
+(kbind-global "C-x C-k" 'delete-frame)

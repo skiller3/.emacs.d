@@ -10,7 +10,6 @@
     ; python-mode
     (require 'python-mode)
     (setq py-install-directory (from-load-path "python-mode.el-6.1.3"))
-    (add-to-list 'load-path py-install-directory)
 
     ; use IPython
     (setq-default py-shell-name "ipython")
@@ -21,8 +20,6 @@
     (define-key python-mode-map (kbd "C-c C-a") 'py-execute-buffer)
     (define-key python-mode-map (kbd "C-c C-c") 'py-execute-line) 
     (define-key python-mode-map (kbd "C-c C-v") 'py-execute-region) 
-
-    (symbol-function 'py-execute-buffer)
 
     ; use the wx backend, for both mayavi and matplotlib
     (setq py-python-command-args

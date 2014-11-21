@@ -45,9 +45,9 @@
 	load-path)))
 
 (defun open-load-file (name) (interactive "MEnter elisp file name: ") 
-  "Opens .emacs or an elisp file that is on the editor's load-path"
-  (if (or (string= name "emacs") (string= name ".emacs") (string= name ""))
-    (find-file (from-load-path ".emacs"))
+  "Opens init.el or another elisp file that is on the editor's load-path"
+  (if (string= name "")
+    (find-file (from-load-path "init.el"))
     (let ((fname (if (string-ends-with name ".el") name (concat name ".el"))))
       (find-file (from-load-path fname)))))
 
@@ -81,8 +81,8 @@
 (highlight-current-line-on t)
 
 (bind-key "C-o" open-load-file)
-(fset 'open-load-file-split-right (with-split-right (lambda-0 (open-load-file))))
-(fset 'open-load-file-split-below (with-split-below (lambda-0 (open-load-file))))
+(fset 'open-load-file-split-right (with-split-right (lambda-0 (call-interactively 'open-load-file))))
+(fset 'open-load-file-split-below (with-split-below (lambda-0 (call-interactively 'open-load-file))))
 (bind-key "C-x C-3 C-o" open-load-file-split-right)
 (bind-key "C-x C-2 C-o" open-load-file-split-below)
 (bind-key "C-d" elisp-doc)
@@ -105,4 +105,3 @@
 (bind-key "C-x C-2 C-l" ielm-split-below)
 
 (disable-y-or-n kill-this-buffer)
-

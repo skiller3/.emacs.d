@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 (provide 'python)
 
 (defun setup-python ()
@@ -17,9 +19,9 @@
 
     ; set reasonable key-bindings for python 
     ; NOTE: C-c C-c would usually execute buffer
-    (define-key python-mode-map (kbd "C-c C-a") 'py-execute-buffer)
-    (define-key python-mode-map (kbd "C-c C-c") 'py-execute-line) 
-    (define-key python-mode-map (kbd "C-c C-v") 'py-execute-region) 
+    (bind-mode-key python-mode-map "C-x C-a" py-execute-buffer)
+    (bind-mode-key python-mode-map "C-x C-e" py-execute-line) 
+    (bind-mode-key python-mode-map "C-c C-r" py-execute-region) 
 
     ; use the wx backend, for both mayavi and matplotlib
     (setq py-python-command-args

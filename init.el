@@ -13,6 +13,10 @@
   "Shortcut macro for globally binding a command to a key sequence"
   `(global-set-key (kbd ,key-str) (quote ,unquoted-fn-symbol)))
 
+(defmacro bind-mode-key (mode-key-map key-str unquoted-fn-symbol)
+  "Shortcut macro for modally binding a command to a key sequence"
+  `(define-key ,mode-key-map (kbd ,key-str) (quote ,unquoted-fn-symbol)))
+
 (defmacro lambda-0 (body)
   `(lambda () ,body))
 
@@ -103,5 +107,7 @@
 (fset 'ielm-split-below (with-split-below (lambda-0 (ielm))))
 (bind-key "C-x C-3 C-l" ielm-split-right)
 (bind-key "C-x C-2 C-l" ielm-split-below)
+(bind-key "C-x C-a" eval-buffer)
+(bind-key "C-x C-r" eval-region)
 
 (disable-y-or-n kill-this-buffer)

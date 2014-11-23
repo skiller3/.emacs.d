@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 (provide 'appearance)
 
 (defun setup-appearance () 
@@ -78,6 +80,4 @@
 
 
     ; make sure the frames have the dark background mode by default
-    (setq default-frame-alist (quote (
-				      (frame-background-mode . dark)
-				      )))))
+    (setq default-frame-alist (quote ((frame-background-mode . dark))))))

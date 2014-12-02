@@ -18,10 +18,20 @@
   `(define-key ,mode-key-map (kbd ,key-str) (quote ,unquoted-fn-symbol)))
 
 (defmacro lambda-0 (body)
+  "Shortcut macro to quickly define a 0-argument lambda"
   `(lambda () ,body))
 
 (defmacro lambda-1 (body)
+  "Shortcut macro to quickly define a 1-argument lambda"
   `(lambda (_) ,body))
+
+(defmacro safely-do (whatever)
+  "Captures errors and adds their details to the message buffer."
+  (let ((err-temp-var (make-symbol "err")))
+    `(condition-case ,err-temp-var
+	 ,whatever
+       (error (message "Failed to safely perform:\n\n%s\n\n%s" 
+		       (quote ,whatever) (error-message-string ,err-temp-var))))))
 
 (defun with-split (split-fn action-fn)
   "Wraps an interactive function so its work is done in another buffer"
@@ -69,20 +79,24 @@
 ; Add everything in ~/.emacs.d to the load path
 (load-recursive (expand-file-name "~/.emacs.d"))
 
-(require 'appearance)
-(setup-appearance)
+(safely-do (require 'appearance))
 
-(require 'python)
-(setup-python)
+(safely-do (require 'python))
 
-(require 'auto-complete-config)
-(add-to-list 'ac-dictionary-directories (from-load-path "ac-dict"))
-(ac-config-default)
-(ac-quick-help t)
-(setq ac-quick-help-delay 0.1)
+(safely-do 
+ (progn
+   (require 'auto-complete-config)
+   (add-to-list 'ac-dictionary-directories (from-load-path "ac-dict"))
+   (ac-config-default)
+   (ac-quick-help t)
+   (setq ac-quick-help-delay 0.1)))
 
-(require 'highlight-current-line)
-(highlight-current-line-on t)
+(safely-do (require 'eimp))
+
+(safely-do
+ (progn
+   (require 'highlight-current-line)
+   (highlight-current-line-on t)))
 
 (bind-key "C-o" open-load-file)
 (fset 'open-load-file-split-right (with-split-right (lambda-0 (call-interactively 'open-load-file))))

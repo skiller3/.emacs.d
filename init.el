@@ -98,6 +98,8 @@
    (require 'highlight-current-line)
    (highlight-current-line-on t)))
 
+(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+
 (bind-key "C-o" open-load-file)
 (fset 'open-load-file-split-right (with-split-right (lambda-0 (call-interactively 'open-load-file))))
 (fset 'open-load-file-split-below (with-split-below (lambda-0 (call-interactively 'open-load-file))))

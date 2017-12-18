@@ -1,129 +1,150 @@
-;; -*- lexical-binding: t; -*-
+;;;;;;;;;;;;;;;;
+;; Base config ;
+;;;;;;;;;;;;;;;;
 
-(require 'cl)
+;; Turn of the annoying bell
+(setq visible-bell 1)
 
-(defmacro disable-y-or-n (unquoted-fn-symbol)
-  "Convenience macro for silencing  y/n prompts associated with a command"
-  `(defadvice ,unquoted-fn-symbol (around stfu compile activate)
-     (flet ((yes-or-no-p (&rest args) t)
-	    (y-or-n-p (&rest args) t))
-       ad-do-it)))
+;; Create key-binding that makes opening *THIS* file easy
+(defun find-init-file ()
+    (interactive)
+    (find-file "c:/Users/skye/AppData/Roaming/.emacs.d/init.el"))
+(global-set-key (kbd "C-x C-i") 'find-init-file)
 
-(defmacro bind-key (key-str unquoted-fn-symbol)
-  "Shortcut macro for globally binding a command to a key sequence"
-  `(global-set-key (kbd ,key-str) (quote ,unquoted-fn-symbol)))
+;; Initialize package manager and add extra repositories
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa-stable" . "http://melpa.org/packages/")
+	     '("marmalade" . "https://marmalade-repo.org/packages/"))
+(package-initialize)
 
-(defmacro bind-mode-key (mode-key-map key-str unquoted-fn-symbol)
-  "Shortcut macro for modally binding a command to a key sequence"
-  `(define-key ,mode-key-map (kbd ,key-str) (quote ,unquoted-fn-symbol)))
+;; Apply a pleasant theme
+(load-theme 'zenburn t)
 
-(defmacro lambda-0 (body)
-  "Shortcut macro to quickly define a 0-argument lambda"
-  `(lambda () ,body))
+;; Sicker command completion than normal using helm
+(require 'helm)
+(global-set-key (kbd "M-x") 'helm-M-x)
+(helm-mode 1)
 
-(defmacro lambda-1 (body)
-  "Shortcut macro to quickly define a 1-argument lambda"
-  `(lambda (_) ,body))
+;; Sick cursor movement commands
+(require 'ace-jump-mode)
+(global-set-key (kbd "C-c C-c") 'ace-jump-char-mode)
+(global-set-key (kbd "C-c C-w") 'ace-jump-word-mode)
+(global-set-key (kbd "C-c C-l") 'ace-jump-line-mode)
 
-(defmacro safely-do (whatever)
-  "Captures errors and adds their details to the message buffer."
-  (let ((err-temp-var (make-symbol "err")))
-    `(condition-case ,err-temp-var
-	 ,whatever
-       (error (message "Failed to safely perform:\n\n%s\n\n%s" 
-		       (quote ,whatever) (error-message-string ,err-temp-var))))))
+;; Sick semantic selection expansion
+(require 'expand-region)
+(global-set-key (kbd "C-c a") 'er/expand-region)
+(global-set-key (kbd "C-c C-a") 'er/expand-region)
 
-(defun with-split (split-fn action-fn)
-  "Wraps an interactive function so its work is done in another buffer"
-   (lambda () (interactive)
-     (progn
-       (funcall split-fn)
-       (other-window 1)
-       (funcall action-fn))))
+;; Set up eshell so we don't have to use Command Prompt
+(setq eshell-login-script "c:/Users/skye/AppData/Roaming/.emacs.d/eshell/login")
 
-(fset 'with-split-right (lambda-1 (with-split #'split-window-right _)))
-(fset 'with-split-below (lambda-1 (with-split #'split-window-below _)))
 
-(defun elisp-doc () (interactive)
-  "Show table of contents for the Elisp manual."
-  (info "elisp"))
 
-(defun string-ends-with (str suffix)
-  "Determines if a string ends with a particular suffix"
-  (string= suffix (substring str (- (length str) (length suffix)))))
+;;;;;;;;;;;;;;;;;;;;;
+;; JavaScript stuff ;
+;;;;;;;;;;;;;;;;;;;;;
 
-(defun from-load-path (suffix)
-  "Returns the first item on the emacs load-path with the specified suffix"
-  (car (remove-if-not 
-	(lambda-1 (string-ends-with _ suffix))
-	load-path)))
+(add-hook 'js-mode-hook 'js2-minor-mode)
+(eval-after-load 'tern
+  '(progn
+     (require 'tern-auto-complete)
+     (tern-ac-setup)))
+(add-hook 'js2-mode-hook 'ac-js2-mode)
+(setq js2-highlight-level 3)
 
-(defun open-load-file (name) (interactive "MEnter elisp file name: ") 
-  "Opens init.el or another elisp file that is on the editor's load-path"
-  (if (string= name "")
-    (find-file (from-load-path "init.el"))
-    (let ((fname (if (string-ends-with name ".el") name (concat name ".el"))))
-      (find-file (from-load-path fname)))))
+;; Turn on paredit for JS
+(defun my-paredit-nonlisp ()
+  "Turn on paredit mode for non-lisps."
+  (interactive)
+  (set (make-local-variable 'paredit-space-for-delimiter-predicates)
+       '((lambda (endp delimiter) nil)))
+  (paredit-mode 1))
+(add-hook 'js-mode-hook 'my-paredit-nopnlisp)
 
-(defun load-recursive (file)
-  "Function that recursively adds the contents of a particular directory onto the editor's load path"
-  (progn
-    (print (concat "Adding to load path: " file))
-    (add-to-list 'load-path file)
-    (if (and (file-directory-p file) 
-	     (not (string-ends-with file ".")))
-	(let ((sub-files (directory-files file t)))
-	  (mapcar (symbol-function 'load-recursive) sub-files)))
-    load-path))
+;; Formatting command for JS
+(add-hook 'js-mode-hook 
+	  (lambda () (local-set-key (kbd "C-c C-f") 'web-beautify-js)))
 
-; Add everything in ~/.emacs.d to the load path
-(load-recursive (expand-file-name "~/.emacs.d"))
+;; JS file-type assignments
+(add-to-list 'auto-mode-alist '("\\.js$" . js-mode))
+(add-to-list 'auto-mode-alist '("\\.json$" . js-mode))
+(add-to-list 'auto-mode-alist '("\\.jsx$" . js-mode))
 
-(safely-do (require 'appearance))
 
-(safely-do (require 'python))
 
-(safely-do 
- (progn
-   (require 'auto-complete-config)
-   (add-to-list 'ac-dictionary-directories (from-load-path "ac-dict"))
-   (ac-config-default)
-   (ac-quick-help t)
-   (setq ac-quick-help-delay 0.1)))
+;;;;;;;;;;;;;;;;;;;;;
+;; HTML & CSS stuff ;
+;;;;;;;;;;;;;;;;;;;;;
 
-(safely-do (require 'eimp))
+;; Auto opening, auto completion, auto expanders, code folding, navigation, 
+;; snippets - HTML/Django, context aware processing.
+(require 'web-mode)
 
-(safely-do
- (progn
-   (require 'highlight-current-line)
-   (highlight-current-line-on t)))
+;; Establish formatting key-bindings for HTML & CSS
+(add-hook 'html-mode-hook 
+	  (lambda () (local-set-key (kbd "C-c C-f") 'web-beautify-html)))
+(add-hook 'css-mode-hook 
+	  (lambda () (local-set-key (kbd "C-c C-f") 'web-beautify-css)))
 
-(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+;; HTML & CSS file-type assignments
+(add-to-list 'auto-mode-alist '("\\.scss$" . css-mode))
+(add-to-list 'auto-mode-alist '("\\.less$" . css-mode))
+(add-to-list 'auto-mode-alist '("\\.html$" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.j2$" . jinja2-mode))
 
-(bind-key "C-o" open-load-file)
-(fset 'open-load-file-split-right (with-split-right (lambda-0 (call-interactively 'open-load-file))))
-(fset 'open-load-file-split-below (with-split-below (lambda-0 (call-interactively 'open-load-file))))
-(bind-key "C-x C-3 C-o" open-load-file-split-right)
-(bind-key "C-x C-2 C-o" open-load-file-split-below)
-(bind-key "C-d" elisp-doc)
-(fset 'elisp-doc-split-right (with-split-right (lambda-0 (elisp-doc))))
-(fset 'elisp-doc-split-below (with-split-below (lambda-0 (elisp-doc))))
-(bind-key "C-x C-3 C-d" elisp-doc-split-right)
-(bind-key "C-x C-2 C-d" elisp-doc-split-below)
-(bind-key "C-x C-n" make-frame)
-(bind-key "C-x C-k" delete-frame)
-(bind-key "C-x k" kill-this-buffer)
-(bind-key "C-t" ansi-term)
-(fset 'ansi-term-split-right (with-split-right (lambda-0 (call-interactively 'ansi-term))))
-(fset 'ansi-term-split-below (with-split-below (lambda-0 (call-interactively 'ansi-term))))
-(bind-key "C-x C-3 C-t" ansi-term-split-right)
-(bind-key "C-x C-2 C-t" ansi-term-split-below)
-(bind-key "C-l" ielm)
-(fset 'ielm-split-right (with-split-right (lambda-0 (ielm))))
-(fset 'ielm-split-below (with-split-below (lambda-0 (ielm))))
-(bind-key "C-x C-3 C-l" ielm-split-right)
-(bind-key "C-x C-2 C-l" ielm-split-below)
-(bind-key "C-x C-a" eval-buffer)
-(bind-key "C-x C-r" eval-region)
+;; Define web-mode variables
 
-(disable-y-or-n kill-this-buffer)
+; Don't really know what this does:
+; (setq web-mode-engines-alist '(("django" . "\\.html\\'")))
+(setq web-mode-markup-indent-offset 2)
+(setq web-mode-code-indent-offset 2)
+(setq web-mode-css-indent-offset 2)
+(setq web-mode-enable-auto-pairing t)
+(setq web-mode-enable-auto-expanding t)
+(setq web-mode-enable-css-colorization t)
+
+;;;;;;;;;;;;;;;;;
+;; Python stuff ;
+;;;;;;;;;;;;;;;;;
+
+;; Most of this config was taken from this presentation:
+;; http://chillaranand.github.io/emacs-py-ide/
+(require 'elpy)
+(elpy-enable)
+(define-key elpy-mode-map (kbd "C-c r") 'elpy-shell-send-region-or-buffer)
+(define-key elpy-mode-map (kbd "C-c C-c") 'ace-jump-char-mode)
+
+
+(require 'yaml-mode)
+(add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
+(add-to-list 'auto-mode-alist '("\\.yaml$" . yaml-mode))
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;; API Blueprint stuff ;
+;;;;;;;;;;;;;;;;;;;;;;;;
+(autoload 'apib-mode "apib-mode"
+  "Major mode for editing API Blueprint files" t)
+(add-to-list 'auto-mode-alist '("\\.apib$" . apib-mode))
+
+;;;;;;;;;;;;;;;;;;;;;;;
+;; Custom face config ;
+;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Apply any custom look-and-feel adjustments that have been made through
+;; customize-faces menu
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("68d36308fc6e7395f7e6355f92c1dd9029c7a672cbecf8048e2933a053cf27e6" default))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

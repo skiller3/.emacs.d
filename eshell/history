@@ -1,32 +1,128 @@
+cd ..
+cd bootstrap-flatly-3.3.6/
 ls
-pwd
-pwd
-dir
-env
-(eshell/env)
-(env)
-clear
-ps
-ps -ef
-which ps
-which ls
-/bin/ls
 ls
-ls -ltr
-/bin/ls -ltr
-(eshell/bin/ls)
-chown
-ls
-find . | grep emacs
-which grep
-ls
-python -c "print('a')"
-python
-ls
-pwd
-cd Documents
+cd ../..
 ls
 cd ..
 ls
-cd workspace/
+ls
+ls
+rm *~
+ls
+cd ..
+ls
+cd ..
+ls
+ls
+cd web/
+ls
+ls
+cd html/
+ls
+mv goals.html goals.jinja
+ls
+mv shared.html shared.jinja
+ls
+mv goals.jinja goals.j
+ls
+mv shared.jinja shared.j
+ls
+mv test.html test.j
+ls
+cd ..
+ls
+ls
+cd html/
+ls
+ls
+cd ..
+ls
+cd image/
+ls
+cd ..
+ls
+cd html/
+ls
+cd ..
+l;s
+ls
+ls style/
+ls html
+ls
+cd thirdparty/
+cd ..
+cd templates/
+ls
+rm *~
+ls
+j2
+j
+j2
+goals.css  goals.scss  shared.css  slshared.scss
+clear
+ls
+cd ../..
+ls
+python webserve.py 
+ls
+cd ../workspace
+ls
+cd p1ggy
+ls
+cd web/
+ls
+ls
+cat persona
+ls
+cd ..
+ls
+cat persona
+ls
+cat persona
+ls
+cd web
+ls
+cd templates
+ls
+cat assessment.j2
+ls
+cd ..
+ls
+cd image
+ls
+cat new-car.svg 
+ls
+cat new-car.svg 
+ls
+ls
+cd ..
+ls
+cd ..
+ls
+cd web/
+ls
+ls
+cd templates
+ls
+cat assessment.html
+ls
+cd ..
+ks
+ls
+cd ..
+ls
+cat webserve.py 
+ls
+python webserve.py 
+venv\Scripts\activate.bat
+python webserve.py 
+ls
+cd workspace
+ls
+cd ../workspace
+cd p1ggy
+ls
+venv\Scripts\activate.bat
+venv\Scripts\activate
 ls
